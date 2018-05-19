@@ -1,41 +1,30 @@
-// モジュールのインポート
 const server = require("express")();
 const line = require("@line/bot-sdk"); // Messaging APIのSDKをインポート
 const request = require('request');
 
-// パラメータ設定
 const line_config = {
-//channelAccessToken: 'アクセストークン',
-//channelSecret: 'Channel Secret'
+//channelAccessToken: 'アクセストークン',//channelSecret: 'Channel Secret'
     channelAccessToken: process.env.LINE_ACCESS_TOKEN, // 環境変数からアクセストークンをセットしています
     channelSecret: process.env.LINE_CHANNEL_SECRET // 環境変数からChannel Secretをセットしています
 };
 
-// APIコールのためのクライアントインスタンスを作成
 const bot = new line.Client(line_config);
 
 
 
-// Webサーバー設定
 server.listen(process.env.PORT || 3000);
 
-// ルーター設定
 server.post('/webhook', line.middleware(line_config), (req, res, next) => {
     res.sendStatus(200);
 
-// すべてのイベント処理のプロミスを格納する配列。
     let events_processed = [];
 
-    // イベントオブジェクトを順次処理。
     req.body.events.forEach((event) => {
-        // この処理の対象をイベントタイプがメッセージで、かつ、テキストタイプだった場合に限定。
         if (event.type == "message" && event.message.type == "text"){
           var imgPattern1 = new RegExp(/^画像 .*/);
           var imgPattern2 = new RegExp(/^画像  .*/);
 
           if (event.message.text.match(imgPattern2)){
-
-            // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             var test = request.get({
               url: 'https://www.googleapis.com/customsearch/v1',
               qs: {
@@ -75,7 +64,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                     if (cols.length == 0) {
                       console.log("https画像がない");
                       console.log(response);
-                      // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                       events_processed.push(bot.replyMessage(event.replyToken, {
                         type: "text",
                         text: "画像の検索に失敗しました。"
@@ -83,7 +71,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                       return;
                     }
                     else {
-                      // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                       events_processed.push(bot.replyMessage(event.replyToken, {
                         type: "template",
                         altText: "this is a image carousel template",
@@ -97,7 +84,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                   } else {
                     console.log("レスポンスがない");
                     console.log(response);
-                    // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                     events_processed.push(bot.replyMessage(event.replyToken, {
                       type: "text",
                       text: "画像の検索に失敗しました。"
@@ -107,7 +93,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                 } catch(e) {
                   console.log("想定外エラー");
                   console.log(e);
-                  // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                   events_processed.push(bot.replyMessage(event.replyToken, {
                     type: "text",
                     text: "画像の検索に失敗しました。"
@@ -117,7 +102,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             });
           }
           else if (event.message.text.match(imgPattern1)){
-            // ユーザーからのテキストメッセージが「こんにちは」だった場合のみ反応。
             var test = request.get({
               url: 'https://www.googleapis.com/customsearch/v1',
               qs: {
@@ -138,7 +122,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                     for(var i in res.items) {
                       if(res.items[i].link.match(urlPattern)) {
                         imageUrl = res.items[i].link;
-                          // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                           events_processed.push(bot.replyMessage(event.replyToken, {
                               type: "image",
                               originalContentUrl: imageUrl,
@@ -150,7 +133,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                     } else {
                       console.log("レスポンスがない");
                       console.log(response);
-                      // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                       events_processed.push(bot.replyMessage(event.replyToken, {
                         type: "text",
                         text: "画像の検索に失敗しました。"
@@ -159,7 +141,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                     if (imageUrl == null) {
                       console.log("https画像がない");
                       console.log(response);
-                      // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                       events_processed.push(bot.replyMessage(event.replyToken, {
                         type: "text",
                         text: "画像の検索に失敗しました。"
@@ -168,7 +149,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
                     return;
                   } catch(e) {
                     console.log(e);
-                    // replyMessage()で返信し、そのプロミスをevents_processedに追加。
                     events_processed.push(bot.replyMessage(event.replyToken, {
                       type: "text",
                       text: "画像の検索に失敗しました。"
@@ -181,7 +161,6 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
         }
     });
 
-    // すべてのイベント処理が終了したら何個のイベントが処理されたか出力。
     Promise.all(events_processed).then(
         (response) => {
             console.log(`${response.length} event(s) processed.`);
