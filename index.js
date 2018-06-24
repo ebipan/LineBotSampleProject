@@ -28,8 +28,8 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             var test = request.get({
               url: 'https://www.googleapis.com/customsearch/v1',
               qs: {
-                  key: 'AIzaSyDmcxG1n9uhxHZblGKhVed12IRLoNocc2c',
-                  cx: '016452044916959564506:p8pjdbjgltq',
+                  key: '',
+                  cx: '',
                   searchType: 'image',
                   q: event.message.text,
                   lr: 'lang_ja',
@@ -105,8 +105,8 @@ server.post('/webhook', line.middleware(line_config), (req, res, next) => {
             var test = request.get({
               url: 'https://www.googleapis.com/customsearch/v1',
               qs: {
-                  key: 'AIzaSyDmcxG1n9uhxHZblGKhVed12IRLoNocc2c',
-                  cx: '016452044916959564506:p8pjdbjgltq',
+                  key: '',
+                  cx: '',
                   searchType: 'image',
                   q: event.message.text,
                   lr: 'lang_ja',
